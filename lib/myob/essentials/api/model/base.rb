@@ -1,3 +1,5 @@
+require 'uri'
+
 module Myob
   module Essentials
     module Api
@@ -15,13 +17,13 @@ module Myob
             @model_name.to_s.downcase
           end
 
-          def get
-            perform_request(url)
+          def get(query = {})
+            perform_request(url(nil, query))
           end
 
-          def find(id)
+          def find(id, query = {})
             object = { 'uid' => id }
-            perform_request(url(object))
+            perform_request(url(object, query))
           end
 
           def save(object)
@@ -32,8 +34,8 @@ module Myob
             @client.connection.delete(url(object), :headers => @client.headers)
           end
 
-          def all_items
-            results = get["items"]
+          def all_items(query = {})
+            results = get(query)["items"]
             while link('next')
               results += next_page["items"] || []
             end
@@ -49,14 +51,21 @@ module Myob
           end
 
 protected
-          def url(object = nil)
-            if model_route == ''
+          def url(object = nil, query = {})
+            base_url = if model_route == ''
               "https://api.myob.com/#{@client.endpoint}/essentials"
             elsif object && object['uid']
               "#{resource_url}/#{object['uid']}"
             else
               resource_url
             end
+
+            query_string = URI.encode_www_form(query)
+            unless query_string.empty?
+              base_url += "?#{query_string}"
+            end
+
+            base_url
           end
 
           def new_record?(object)
