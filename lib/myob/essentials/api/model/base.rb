@@ -74,12 +74,14 @@ protected
 
           def create(object)
             object = typecast(object)
-            @client.connection.post(url, {:headers => @client.headers, :body => object.to_json})
+            response = @client.connection.post(url, {:headers => @client.headers, :body => object.to_json})
+            parse_response(response.body)
           end
 
           def update(object)
             object = typecast(object)
-            @client.connection.put(url(object), {:headers => @client.headers, :body => object.to_json})
+            response = @client.connection.put(url(object), {:headers => @client.headers, :body => object.to_json})
+            parse_response(response.body)
           end
 
           def typecast(object)
@@ -112,7 +114,11 @@ protected
           
           def perform_request(url)
             response = @client.connection.get(url, {:headers => @client.headers})
-            hash = JSON.parse(response.body)
+            parse_response(response.body)
+          end
+
+          def parse_response(body)
+            hash = JSON.parse(body)
             @links = hash['_links']
             hash
           end
