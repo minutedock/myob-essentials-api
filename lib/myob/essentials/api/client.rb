@@ -26,7 +26,7 @@ module Myob
           @consumer             = options[:consumer]
           @access_token         = options[:access_token]
           @refresh_token        = options[:refresh_token]
-          @auto_refresh         = options[:auto_refresh] || true
+          @auto_refresh         = options[:auto_refresh] || (true if options[:auto_refresh].nil?)
           @endpoint             = options[:endpoint] || 'au'
           @business_uid         = options[:business_uid]
           
